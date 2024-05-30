@@ -20,6 +20,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(PcapPlusPlus)
 
+FetchContent_Declare(
+  log4cplus
+  GIT_REPOSITORY https://github.com/log4cplus/log4cplus.git
+  GIT_TAG REL_2_1_1  # или конкретный тег или ветку
+)
+FetchContent_MakeAvailable(log4cplus)
+
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h )
 add_executable(pcap_viewer ${SOURCES})
 
@@ -38,4 +45,5 @@ target_link_libraries(pcap_viewer
                         ftxui::dom
                         ftxui::screen
                         ftxui::component
+                        log4cplus
 )

@@ -8,17 +8,26 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 
+#include "log4cplus/logger.h"
+#include "log4cplus/configurator.h"
+#include "log4cplus/loggingmacros.h"
+
 using namespace ftxui;
 
 std::mutex packets_mutex;
 
 int main() {
+    log4cplus::initialize();
+    log4cplus::PropertyConfigurator::doConfigure("../log.properties");
+
+    log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
+
     PcapDevice pdev;
     auto listDev = pdev.listOfNetworkInterfaces();
     std::string name;
     if (auto it = listDev.find("enp8s0"); it != std::string::npos) {
         name = listDev.substr(it, 6);
-        std::cout << "Entered network interface:\t" << listDev.substr(it, 6) << '\n';
+        LOG4CPLUS_INFO(logger, "Entered network interface:\t" << listDev.substr(it, 6));
     }
 
     pdev.setNameOfNetworkInterface(name);
@@ -65,9 +74,5 @@ int main() {
 
     screen.Loop(container);
 //    screen.Loop(mainComponent);
-    auto packets = pdev.convertor();
-    for (auto item : packets) {
-        std::cout << item;
-    }
     return 0;
 }
