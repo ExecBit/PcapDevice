@@ -36,6 +36,50 @@ void printUsage() {
 		<< std::endl;
 }
 
+void printOptions() {
+	std::cout 
+		<< "Options:" << std::endl
+		<< std::endl
+		<< "    fil\t:Set Filter\n"
+		<< "    chin\t:Change interface\n" 
+		<< "    print\t:Print traffic\n"
+		<< "    help\t:Print info\n"
+		<< "    status\t:Print status\n"
+		<< "    q   \t:Exit"
+		<< std::endl;
+}
+
+void options(PcapDevice& pdev) {
+    printOptions();
+    while (true) {
+        std::cout << "command: ";
+        std::string input;
+        std::getline(std::cin, input);
+
+        clearScreen();
+        if (input == "fil") {
+            std::cout << "Set filter" << std::endl;
+            continue;
+        } else if (input == "chin") {
+            std::cout << "Change network interface" << std::endl;
+            continue;
+        } else if (input == "print"){
+            std::cout << "printing packages" << std::endl;
+            for (const auto& item : pdev.convertor()) {
+                std::cout << item << '\n';
+            }
+            continue;
+        } else if (input == "help"){
+            printOptions();
+            continue;
+        } else if (input == "q"){
+            std::cout << "Exit" << std::endl;
+            break;
+        std::cout << "Wrong command, try again" << std::endl;
+        }
+    }
+}
+
 int main() {
     log4cplus::PropertyConfigurator::doConfigure("../config/logger.cfg");
     auto mainLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
@@ -96,8 +140,9 @@ int main() {
                 continue;
             }
             std::cout << "ERROR: capturing is not going" << std::endl;
-        } else if (input == "options") {
-            std::cout << "This is options" << std::endl;
+        } else if (input == "opt") {
+            std::cout << "==========options=========" << std::endl;
+            options(pdev);
             continue;
         } else if (input == "print"){
             std::cout << "printing packages" << std::endl;
@@ -111,8 +156,8 @@ int main() {
         } else if (input == "q"){
             std::cout << "Exit" << std::endl;
             break;
-        }
         std::cout << "Wrong command, try again" << std::endl;
+        }
     }
 
     return 0;

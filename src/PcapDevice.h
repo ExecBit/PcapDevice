@@ -10,6 +10,7 @@ public:
 	void startCapturing(int time = 600);
 	size_t stopCapturing();
 	std::string listOfNetworkInterfaces();
+	std::string baseInfo();
 	void setNameOfNetworkInterface(const std::string& name);
 	std::vector<std::string> convertor();
 	std::atomic<bool> capturing{false};

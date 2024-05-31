@@ -27,6 +27,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(log4cplus)
 
+FetchContent_Declare(
+  CLI11
+  GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+  GIT_TAG v2.4.2  # или конкретный тег или ветку
+)
+FetchContent_MakeAvailable(CLI11)
+
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h )
 add_executable(pcap_viewer ${SOURCES})
 
@@ -46,4 +53,5 @@ target_link_libraries(pcap_viewer
                         ftxui::screen
                         ftxui::component
                         log4cplus
+                        CLI11::CLI11
 )
