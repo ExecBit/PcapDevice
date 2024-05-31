@@ -162,3 +162,71 @@ int main() {
 
     return 0;
 }
+
+/*
+#include <iostream>
+#include <memory>
+#include "PcapFileDevice.h"
+#include "PcapLiveDeviceList.h"
+#include "SystemUtils.h"
+#include "PcapDevice.h"
+#include "log4cplus/configurator.h"
+#include "log4cplus/loggingmacros.h"
+
+void clearScreen() {
+    // Используем escape-последовательность для очистки экрана
+    std::cout << "\033[2J\033[1;1H";
+}
+
+struct Counter {
+    int count{0};
+};
+
+static void onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
+{
+    // extract the stats object form the cookie
+    Counter* stats = (Counter*)cookie;
+
+    // parsed the raw packet
+    pcpp::Packet parsedPacket(packet);
+
+    std::stringstream strm;
+    for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
+    {
+        strm << "No. " << stats->count << '\t' 
+            << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
+            << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
+            << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
+            << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
+    }
+    stats->count += 1;
+    std::cout << strm.str();
+    // collect stats from packet
+ //   stats->consumePacket(parsedPacket);
+}
+
+int main() {
+    log4cplus::PropertyConfigurator::doConfigure("../config/logger.cfg");
+    auto mainLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
+
+    auto device = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName("enp8s0");
+
+    if (!device) {
+        exit(-1);
+    }
+
+    if (!device->open()) {
+        exit(-1);
+    }
+
+    Counter k;
+
+    device->startCapture(onPacketArrives, &k);
+
+    pcpp::multiPlatformSleep(5);
+
+    device->stopCapture();
+
+    return 0;
+}
+*/

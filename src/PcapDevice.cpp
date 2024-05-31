@@ -38,9 +38,14 @@ void PcapDevice::init() {
     }
 }
 
+struct Counter {
+    int count{0};
+};
+
 void PcapDevice::startCapturing(int time) {
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture with packet vector..."));
-    m_device->startCapture(m_packetVec);
+    Counter k;
+    m_device->startCapture(onPacketArrives, &k);
     capturing = true;
     pcpp::multiPlatformSleep(time);
 
@@ -83,6 +88,29 @@ std::vector<std::string> PcapDevice::convertor() {
         res.push_back(strm.str());
     }
     return res;
+}
+
+void PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
+{
+    // extract the stats object form the cookie
+    Counter* stats = (Counter*)cookie;
+
+    // parsed the raw packet
+    pcpp::Packet parsedPacket(packet);
+
+    std::stringstream strm;
+    for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
+    {
+        strm << "No. " << stats->count << '\t' 
+            << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
+            << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
+            << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
+            << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
+    }
+    stats->count += 1;
+    std::cout << strm.str();
+    // collect stats from packet
+ //   stats->consumePacket(parsedPacket);
 }
 
 std::string baseInfo() {

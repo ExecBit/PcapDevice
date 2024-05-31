@@ -15,9 +15,10 @@ public:
 	std::vector<std::string> convertor();
 	std::atomic<bool> capturing{false};
 	static constexpr bool isSaveFile{false};
+	static void onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
+	pcpp::PcapLiveDevice* m_device{nullptr};
 private:
 	pcpp::RawPacketVector m_packetVec;
-	pcpp::PcapLiveDevice* m_device{nullptr};
 	std::string m_interfaceIP{"10.10.0.146"};
 	std::string m_nameOfNetworkInterface{"none"};
 	log4cplus::Logger m_logger;
