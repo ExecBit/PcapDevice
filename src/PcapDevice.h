@@ -8,7 +8,7 @@ public:
 	PcapDevice();
 	void init();
 	void startCapturing(int time = 600);
-	void stopCapturing();
+	size_t stopCapturing();
 	std::string listOfNetworkInterfaces();
 	void setNameOfNetworkInterface(const std::string& name);
 	std::vector<std::string> convertor();

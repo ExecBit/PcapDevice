@@ -4,20 +4,14 @@
 #include "PcapLiveDeviceList.h"
 #include "SystemUtils.h"
 #include "PcapDevice.h"
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/dom/elements.hpp>
 #include "log4cplus/configurator.h"
 #include "log4cplus/loggingmacros.h"
-
-
-#include <cmath>       // for sin
-using namespace ftxui;
 
 void clearScreen() {
     // Используем escape-последовательность для очистки экрана
     std::cout << "\033[2J\033[1;1H";
 }
+
 bool containsWord(const std::string& str1, const std::string& str2) {
     std::istringstream iss(str2);
     std::string word;
@@ -29,12 +23,15 @@ bool containsWord(const std::string& str1, const std::string& str2) {
     return false;
 }
 void printUsage() {
-	std::cout << std::endl
+	std::cout 
 		<< "Options:" << std::endl
 		<< std::endl
 		<< "    start\t:Start capture traffic\n"
 		<< "    stop\t:Stop capture traffic\n" 
 		<< "    print\t:Print traffic\n"
+		<< "    opt\t:Options\n"
+		<< "    help\t:Print info\n"
+		<< "    status\t:Print status\n"
 		<< "    q   \t:Exit"
 		<< std::endl;
 }
@@ -72,6 +69,7 @@ int main() {
 
     printUsage();
     while (true) {
+        std::cout << "command: ";
         std::string input;
         std::getline(std::cin, input);
 
@@ -82,6 +80,7 @@ int main() {
                 continue;
             }
             std::cout << "Capturing is not going" << std::endl;
+            continue;
         } else if (input == "start") {
             if (!pdev.capturing) {
                 std::cout << "Start Capturing....." << std::endl;
@@ -92,12 +91,19 @@ int main() {
         } else if (input == "stop") {
             if (pdev.capturing) {
                 std::cout << "Stop capturing...." << std::endl;
-                pdev.stopCapturing();
+                const auto numberCapPac = pdev.stopCapturing();
+                std::cout << numberCapPac << " packets captured" << std::endl;
                 continue;
             }
             std::cout << "ERROR: capturing is not going" << std::endl;
+        } else if (input == "options") {
+            std::cout << "This is options" << std::endl;
+            continue;
         } else if (input == "print"){
             std::cout << "printing packages" << std::endl;
+            for (const auto& item : pdev.convertor()) {
+                std::cout << item << '\n';
+            }
             continue;
         } else if (input == "help"){
             printUsage();

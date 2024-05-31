@@ -47,7 +47,7 @@ void PcapDevice::startCapturing(int time) {
     stopCapturing();
 }
 
-void PcapDevice::stopCapturing() {
+size_t PcapDevice::stopCapturing() {
     m_device->stopCapture();
 
     capturing = false;
@@ -56,10 +56,11 @@ void PcapDevice::stopCapturing() {
     pcpp::PcapFileWriterDevice pcapWriter("output.pcap");
     if (!pcapWriter.open()) {
         LOG4CPLUS_WARN(m_logger, LOG4CPLUS_TEXT("Cannot open output.pcap for writing"));
-        return;
+        return -1;
     }
 
     pcapWriter.writePackets(m_packetVec);
+    return m_packetVec.size();
 }
 std::vector<std::string> PcapDevice::convertor() {
     if (capturing) {
@@ -67,17 +68,23 @@ std::vector<std::string> PcapDevice::convertor() {
     }
     std::vector<std::string> res; 
     std::stringstream strm;
+    unsigned count{0};
     for (const auto& packet : m_packetVec) {
         pcpp::Packet parsedPacket(packet);
         for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
         {
-            strm 
+            strm << "No. " << count << '\t' 
                 << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
                 << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
                 << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
-                << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]"; // get the payload length of the layer (equals total length minus header length)
+                << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
         }
+        ++count;
         res.push_back(strm.str());
     }
     return res;
+}
+
+std::string baseInfo() {
+    return "";
 }
