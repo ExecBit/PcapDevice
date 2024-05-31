@@ -14,6 +14,10 @@
 #include <cmath>       // for sin
 using namespace ftxui;
 
+void clearScreen() {
+    // Используем escape-последовательность для очистки экрана
+    std::cout << "\033[2J\033[1;1H";
+}
 bool containsWord(const std::string& str1, const std::string& str2) {
     std::istringstream iss(str2);
     std::string word;
@@ -28,9 +32,10 @@ void printUsage() {
 	std::cout << std::endl
 		<< "Options:" << std::endl
 		<< std::endl
-		<< "    start start_capture_traffic        : Input directory" << std::endl
-		<< "    stop  stop_capture_traffic         : Don't include sub-directories (default is include them)" << std::endl
-		<< "    print print traffic  : Criteria to search in Berkeley Packet Filter (BPF) syntax (http://biot.com/capstats/bpf.html)" << std::endl
+		<< "    start\t:Start capture traffic\n"
+		<< "    stop\t:Stop capture traffic\n" 
+		<< "    print\t:Print traffic\n"
+		<< "    q   \t:Exit"
 		<< std::endl;
 }
 
@@ -65,13 +70,19 @@ int main() {
     pdev.setNameOfNetworkInterface(name);
     pdev.init();
 
+    printUsage();
     while (true) {
-        printUsage();
-
         std::string input;
         std::getline(std::cin, input);
 
-        if (input == "start") {
+        clearScreen();
+        if (input == "status") {
+            if (pdev.capturing) {
+                std::cout << "Capturing is going" << std::endl;
+                continue;
+            }
+            std::cout << "Capturing is not going" << std::endl;
+        } else if (input == "start") {
             if (!pdev.capturing) {
                 std::cout << "Start Capturing....." << std::endl;
                 std::thread([&] { pdev.startCapturing(); }).detach();
@@ -87,10 +98,15 @@ int main() {
             std::cout << "ERROR: capturing is not going" << std::endl;
         } else if (input == "print"){
             std::cout << "printing packages" << std::endl;
+            continue;
+        } else if (input == "help"){
+            printUsage();
+            continue;
         } else if (input == "q"){
-            std::cout << "Выход из программы." << std::endl;
+            std::cout << "Exit" << std::endl;
             break;
         }
+        std::cout << "Wrong command, try again" << std::endl;
     }
 
     return 0;

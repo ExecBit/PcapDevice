@@ -13,6 +13,7 @@ public:
 	void setNameOfNetworkInterface(const std::string& name);
 	std::vector<std::string> convertor();
 	std::atomic<bool> capturing{false};
+	static constexpr bool isSaveFile{false};
 private:
 	pcpp::RawPacketVector m_packetVec;
 	pcpp::PcapLiveDevice* m_device{nullptr};
