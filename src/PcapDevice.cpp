@@ -38,22 +38,18 @@ void PcapDevice::init() {
     }
 }
 
-struct Counter {
-    int count{0};
-};
-
 void PcapDevice::startCapturing(int time) {
-    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture with packet vector..."));
-    Counter k;
-    m_device->startCapture(onPacketArrives, &k);
+    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture"));
+    m_device->startCapture(onPacketArrives, &m_stats);
     capturing = true;
     pcpp::multiPlatformSleep(time);
 
     stopCapturing();
 }
 
-size_t PcapDevice::stopCapturing() {
+void PcapDevice::stopCapturing() {
     m_device->stopCapture();
+    m_packetVec = m_stats.m_packetVec; 
 
     capturing = false;
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Stop capture"));
@@ -61,12 +57,14 @@ size_t PcapDevice::stopCapturing() {
     pcpp::PcapFileWriterDevice pcapWriter("output.pcap");
     if (!pcapWriter.open()) {
         LOG4CPLUS_WARN(m_logger, LOG4CPLUS_TEXT("Cannot open output.pcap for writing"));
-        return -1;
+        return;
     }
 
-    pcapWriter.writePackets(m_packetVec);
-    return m_packetVec.size();
+    pcapWriter.writePackets(m_stats.m_packetVec);
+
+    std::cout << m_stats.count << " packets captured" << std::endl;
 }
+
 std::vector<std::string> PcapDevice::convertor() {
     if (capturing) {
         return {};
@@ -94,18 +92,19 @@ void PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* 
 {
     // extract the stats object form the cookie
     Counter* stats = (Counter*)cookie;
-
     // parsed the raw packet
+//    stats->m_packetVec.pushBack(packet);
     pcpp::Packet parsedPacket(packet);
 
     std::stringstream strm;
+    strm << "No. " << stats->count << '\t' << parsedPacket.toString() << '\n';
     for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
     {
-        strm << "No. " << stats->count << '\t' 
-            << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
-            << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
-            << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
-            << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
+///     strm << "No. " << stats->count << '\t' 
+///         << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
+///         << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
+///         << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
+///         << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
     }
     stats->count += 1;
     std::cout << strm.str();
