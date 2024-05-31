@@ -5,7 +5,14 @@
 #include "SystemUtils.h"
 #include <sstream>
 
+#include "log4cplus/loggingmacros.h"
+
+PcapDevice::PcapDevice() : m_logger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("PcapDevice")))  {
+    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("PcapDevice instance created."));
+}
+
 void PcapDevice::setNameOfNetworkInterface(const std::string& name) {
+    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("PcapDevice set name of network interface: " + name));
     m_nameOfNetworkInterface = name;
 }
 
@@ -19,21 +26,20 @@ std::string PcapDevice::listOfNetworkInterfaces() {
 }
 
 void PcapDevice::init() {
-    //m_device = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByIp(m_interfaceIP);
     m_device = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(m_nameOfNetworkInterface);
     if (!m_device) {
-        std::cerr << "Cannot find interface with IPv4 address of '" << m_interfaceIP << "'" << std::endl;
+        LOG4CPLUS_FATAL(m_logger, LOG4CPLUS_TEXT("Cannot find interface with name: " + m_nameOfNetworkInterface));
         exit(-1);
     }
 
     if (!m_device->open()) {
-        std::cerr << "Cannot open device" << std::endl;
+        LOG4CPLUS_FATAL(m_logger, LOG4CPLUS_TEXT("Cannot open device"));
         exit(-1);
     }
 }
 
 void PcapDevice::startCapturing(int time) {
-    std::cout << std::endl << "Starting capture with packet vector..." << std::endl;
+    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture with packet vector..."));
     m_device->startCapture(m_packetVec);
     capturing = true;
     pcpp::multiPlatformSleep(time);
@@ -45,11 +51,11 @@ void PcapDevice::stopCapturing() {
     m_device->stopCapture();
 
     capturing = false;
-    std::cout << std::endl << "Stop capture" << std::endl;
+    LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Stop capture"));
 
     pcpp::PcapFileWriterDevice pcapWriter("output.pcap");
     if (!pcapWriter.open()) {
-        std::cerr << "Cannot open output.pcap for writing" << std::endl;
+        LOG4CPLUS_WARN(m_logger, LOG4CPLUS_TEXT("Cannot open output.pcap for writing"));
         return;
     }
 
