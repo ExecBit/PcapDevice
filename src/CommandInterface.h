@@ -10,15 +10,14 @@ public:
     void run();
 
 private:
-    void processCommand(const std::string& command);
-    void readFileMenu();
-
     void showMainMenu();
     void showCaptureMenu();
+    void showReadFileMenu();
     void executeCommand(const std::string& command);
 
     std::unordered_map<std::string, std::function<void()>> mainMenuCommands;
     std::unordered_map<std::string, std::function<void()>> captureMenuCommands;
+    std::unordered_map<std::string, std::function<void()>> readFileMenuCommands;
     std::stack<std::unordered_map<std::string, std::function<void()>>*> menuStack;
 
     void clearScreen();

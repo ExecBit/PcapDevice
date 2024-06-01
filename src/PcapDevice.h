@@ -6,7 +6,7 @@
 class PcapDevice {
 
 struct Counter {
-    int count{1};
+    int count{0};
     pcpp::RawPacketVector m_packetVec;
 };
 
