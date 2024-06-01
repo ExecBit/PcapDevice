@@ -4,6 +4,7 @@
 #include "PcapLiveDeviceList.h"
 #include "SystemUtils.h"
 #include <sstream>
+#include <string>
 
 #include "log4cplus/loggingmacros.h"
 
@@ -39,42 +40,39 @@ void PcapDevice::init() {
 }
 
 void PcapDevice::start() {
-    if (!running) {
-        stop_requested = false;
-        timer_seconds = 0;
-        timer_thread = std::thread(&PcapDevice::startCapturing, this, 10);
-        running = true;
-        std::cout << "Timer started" << std::endl;
+    if (!m_running) {
+        m_stopRequested = false;
+        m_devThread = std::thread(&PcapDevice::startCapturing, this);
+        m_running = true;
+        std::cout << "Capture started" << std::endl;
     } else {
-        std::cout << "Timer is already running" << std::endl;
+        std::cout << "Capture is already running" << std::endl;
     }
 }
 
 void PcapDevice::stop() {
-    if (running) {
+    if (m_running) {
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            stop_requested = true;
+            std::lock_guard<std::mutex> lock(m_mtx);
+            m_stopRequested = true;
         }
-        cv.notify_all();
-        timer_thread.join();
-        running = false;
-        std::cout << "Timer stopped and data saved" << std::endl;
+        m_conVar.notify_all();
+        m_devThread.join();
+        m_running = false;
     } else {
-        std::cout << "Timer is not running" << std::endl;
+        std::cout << "Capture is not running" << std::endl;
     }
 }
 
-void PcapDevice::startCapturing(int time) {
+void PcapDevice::startCapturing() {
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture"));
-//    m_device->startCaptureBlockingMode(onPacketArrives, &m_stats, time);
+
     m_device->startCapture(onPacketArrivesAsync, &m_stats);
-//    capturing = true;
-    while (!stop_requested) {
+    while (!m_stopRequested) {
         {
-            std::unique_lock<std::mutex> lock(mtx);
-            cv.wait_for(lock, std::chrono::seconds(1), [this] { return stop_requested.load(); });
-            if (stop_requested) break;
+            std::unique_lock<std::mutex> lock(m_mtx);
+            m_conVar.wait_for(lock, std::chrono::seconds(1), [this] { return m_stopRequested.load(); });
+            if (m_stopRequested) break;
         }
     }
 
@@ -85,7 +83,6 @@ void PcapDevice::stopCapturing() {
     m_device->stopCapture();
     m_packetVec = m_stats.m_packetVec; 
 
-    capturing = false;
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Stop capture"));
 
     pcpp::PcapFileWriterDevice pcapWriter("output.pcap");
@@ -100,9 +97,6 @@ void PcapDevice::stopCapturing() {
 }
 
 std::vector<std::string> PcapDevice::convertor() {
-    if (capturing) {
-        return {};
-    }
     std::vector<std::string> res; 
     std::stringstream strm;
     unsigned count{0};
@@ -130,19 +124,6 @@ void PcapDevice::onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDev
     stats->m_packetVec.pushBack(newPack);
     pcpp::Packet parsedPacket(packet);
 
-    std::stringstream strm;
-    strm << "No. " << stats->count << '\t' << parsedPacket.toString() << '\n';
-    for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
-    {
-///     strm << "No. " << stats->count << '\t' 
-///         << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
-///         << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
-///         << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
-///         << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
-    }
-    stats->count += 1;
-    std::cout << strm.str();
-    // collect stats from packet
- //   stats->consumePacket(parsedPacket);
+    std::cout << "\nNo. " + std::to_string(stats->count++) + '\t' + parsedPacket.toString() + '\n';
 }
 

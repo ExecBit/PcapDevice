@@ -12,8 +12,8 @@ void CommandInterface::run() {
     std::string command;
 
     while (true) {
-        //std::cout << "Enter command (start, stop, exit): ";
 	std::cout 
+                << "===================================\n"
 		<< "Options:" << std::endl
 		<< "    start\t:Start capture traffic\n"
 		<< "    x\t:Stop capture traffic\n" 
@@ -22,7 +22,8 @@ void CommandInterface::run() {
 		<< "    help\t:Print info\n"
 		<< "    status\t:Print status\n"
 		<< "    q   \t:Exit"
-		<< std::endl;
+                << "\n===================================\n";
+        std::cout << "command: ";
         std::cin >> command;
 
         // Clear the screen before processing the command
@@ -39,10 +40,8 @@ void CommandInterface::processCommand(const std::string& command) {
         timer.stop();
     } else if (command == "x") {
         timer.stop();
-      //std::cout << "Program terminated" << std::endl;
-      //exit(0);
     } else if (command == "q") {
-      exit(0);
+        exit(0);
     } else {
         std::cout << "Invalid command" << std::endl;
     }
