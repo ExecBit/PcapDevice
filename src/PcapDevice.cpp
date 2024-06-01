@@ -40,9 +40,8 @@ void PcapDevice::init() {
 
 void PcapDevice::startCapturing(int time) {
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture"));
-    m_device->startCapture(onPacketArrives, &m_stats);
+    m_device->startCaptureBlockingMode(onPacketArrives, &m_stats, time);
     capturing = true;
-    pcpp::multiPlatformSleep(time);
 
     stopCapturing();
 }
@@ -88,12 +87,13 @@ std::vector<std::string> PcapDevice::convertor() {
     return res;
 }
 
-void PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
+bool PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
 {
     // extract the stats object form the cookie
     Counter* stats = (Counter*)cookie;
     // parsed the raw packet
-//    stats->m_packetVec.pushBack(packet);
+    auto* newPack = new pcpp::RawPacket(*packet);
+    stats->m_packetVec.pushBack(newPack);
     pcpp::Packet parsedPacket(packet);
 
     std::stringstream strm;
@@ -110,6 +110,7 @@ void PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* 
     std::cout << strm.str();
     // collect stats from packet
  //   stats->consumePacket(parsedPacket);
+    return false;
 }
 
 std::string baseInfo() {

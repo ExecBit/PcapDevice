@@ -132,7 +132,7 @@ int main() {
                 continue;
             }
             std::cout << "ERROR: capturing is going" << std::endl;
-        } else if (input == "stop") {
+        } else if (input == "x") {
             if (pdev.capturing) {
                 std::cout << "Stop capturing...." << std::endl;
                 continue;

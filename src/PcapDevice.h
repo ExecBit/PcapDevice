@@ -21,7 +21,7 @@ public:
 	std::vector<std::string> convertor();
 	std::atomic<bool> capturing{false};
 	static constexpr bool isSaveFile{false};
-	static void onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
+	static bool onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
 	pcpp::PcapLiveDevice* m_device{nullptr};
 private:
 	pcpp::RawPacketVector m_packetVec;
