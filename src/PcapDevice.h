@@ -21,9 +21,20 @@ public:
 	std::vector<std::string> convertor();
 	std::atomic<bool> capturing{false};
 	static constexpr bool isSaveFile{false};
-	static bool onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
-	pcpp::PcapLiveDevice* m_device{nullptr};
+	static void onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
+
+	std::atomic<bool> running{false};
+	std::atomic<bool> stop_requested;
+	std::atomic<int> timer_seconds;
+	std::thread timer_thread;
+	std::mutex mtx;
+	std::condition_variable cv;
+
+	void start();
+	void stop();
+
 private:
+	pcpp::PcapLiveDevice* m_device{nullptr};
 	pcpp::RawPacketVector m_packetVec;
 	std::string m_interfaceIP{"10.10.0.146"};
 	std::string m_nameOfNetworkInterface{"none"};

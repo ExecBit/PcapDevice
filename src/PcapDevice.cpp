@@ -38,10 +38,45 @@ void PcapDevice::init() {
     }
 }
 
+void PcapDevice::start() {
+    if (!running) {
+        stop_requested = false;
+        timer_seconds = 0;
+        timer_thread = std::thread(&PcapDevice::startCapturing, this, 10);
+        running = true;
+        std::cout << "Timer started" << std::endl;
+    } else {
+        std::cout << "Timer is already running" << std::endl;
+    }
+}
+
+void PcapDevice::stop() {
+    if (running) {
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            stop_requested = true;
+        }
+        cv.notify_all();
+        timer_thread.join();
+        running = false;
+        std::cout << "Timer stopped and data saved" << std::endl;
+    } else {
+        std::cout << "Timer is not running" << std::endl;
+    }
+}
+
 void PcapDevice::startCapturing(int time) {
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Starting capture"));
-    m_device->startCaptureBlockingMode(onPacketArrives, &m_stats, time);
-    capturing = true;
+//    m_device->startCaptureBlockingMode(onPacketArrives, &m_stats, time);
+    m_device->startCapture(onPacketArrivesAsync, &m_stats);
+//    capturing = true;
+    while (!stop_requested) {
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            cv.wait_for(lock, std::chrono::seconds(1), [this] { return stop_requested.load(); });
+            if (stop_requested) break;
+        }
+    }
 
     stopCapturing();
 }
@@ -87,8 +122,7 @@ std::vector<std::string> PcapDevice::convertor() {
     return res;
 }
 
-bool PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
-{
+void PcapDevice::onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie) {
     // extract the stats object form the cookie
     Counter* stats = (Counter*)cookie;
     // parsed the raw packet
@@ -110,9 +144,5 @@ bool PcapDevice::onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* 
     std::cout << strm.str();
     // collect stats from packet
  //   stats->consumePacket(parsedPacket);
-    return false;
 }
 
-std::string baseInfo() {
-    return "";
-}

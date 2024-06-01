@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include "CommandInterface.h"
 #include "PcapFileDevice.h"
 #include "PcapLiveDeviceList.h"
 #include "SystemUtils.h"
@@ -27,7 +28,7 @@ void printUsage() {
 		<< "Options:" << std::endl
 		<< std::endl
 		<< "    start\t:Start capture traffic\n"
-		<< "    stop\t:Stop capture traffic\n" 
+		<< "    x\t:Stop capture traffic\n" 
 		<< "    print\t:Print traffic\n"
 		<< "    opt\t:Options\n"
 		<< "    help\t:Print info\n"
@@ -84,6 +85,10 @@ int main() {
     log4cplus::PropertyConfigurator::doConfigure("../config/logger.cfg");
     auto mainLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
 
+    CommandInterface cmd;
+    cmd.run();
+
+    /*
     PcapDevice pdev;
     auto listDev = pdev.listOfNetworkInterfaces();
 
@@ -126,6 +131,7 @@ int main() {
             std::cout << "Capturing is not going" << std::endl;
             continue;
         } else if (input == "start") {
+            pdev.start();
             if (!pdev.capturing) {
                 std::cout << "Start Capturing....." << std::endl;
                 std::thread([&] { pdev.startCapturing(5); }).detach();
@@ -133,6 +139,7 @@ int main() {
             }
             std::cout << "ERROR: capturing is going" << std::endl;
         } else if (input == "x") {
+            pdev.stop();
             if (pdev.capturing) {
                 std::cout << "Stop capturing...." << std::endl;
                 continue;
@@ -157,6 +164,7 @@ int main() {
         std::cout << "Wrong command, try again" << std::endl;
         }
     }
+*/
 
     return 0;
 }
