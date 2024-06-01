@@ -1,6 +1,7 @@
 #include <iostream>
 #include "PcapDevice.h"
 #include "PcapFileDevice.h"
+#include "PcapFilter.h"
 #include "PcapLiveDeviceList.h"
 #include "SystemUtils.h"
 #include <sstream>
@@ -81,7 +82,7 @@ void PcapDevice::startCapturing() {
 
 void PcapDevice::stopCapturing() {
     m_device->stopCapture();
-    m_packetVec = m_stats.m_packetVec; 
+    m_packetVec = m_stats.packetVec; 
 
     LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Stop capture"));
 
@@ -91,7 +92,7 @@ void PcapDevice::stopCapturing() {
         return;
     }
 
-    pcapWriter.writePackets(m_stats.m_packetVec);
+    pcapWriter.writePackets(m_stats.packetVec);
 
     std::cout << m_stats.count << " packets captured" << std::endl;
 }
@@ -119,11 +120,30 @@ std::vector<std::string> PcapDevice::convertor() {
 void PcapDevice::onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie) {
     // extract the stats object form the cookie
     Counter* stats = (Counter*)cookie;
+
+    pcpp::BPFStringFilter filter{stats->filter};
+    if (!filter.matchPacketWithFilter(packet)) {
+        return;
+    }
+
     // parsed the raw packet
     auto* newPack = new pcpp::RawPacket(*packet);
-    stats->m_packetVec.pushBack(newPack);
+    stats->packetVec.pushBack(newPack);
     pcpp::Packet parsedPacket(packet);
 
     std::cout << "\nNo. " + std::to_string(stats->count++) + '\t' + parsedPacket.toString() + '\n';
 }
 
+void PcapDevice::setFilter() {
+    std::string input;
+    std::cout << ": ";
+    std::cin >> input;
+
+    if (m_device->setFilter(input)) {
+        m_stats.filter = input;
+        LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Set filter " + input));
+        return;
+    }
+    std::cout << "ERROR set filter\n";
+    LOG4CPLUS_WARN(m_logger, LOG4CPLUS_TEXT("Set filter: " + input + " failed!"));
+}

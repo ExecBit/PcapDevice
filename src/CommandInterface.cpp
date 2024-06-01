@@ -30,7 +30,7 @@ CommandInterface::CommandInterface() {
         }},
         {"default", []() { std::cout << "Setting option...\n"; }},
         {"chin", []() { std::cout << "Setting option...\n"; }},
-        {"setFilter", []() { std::cout << "Setting option...\n"; }},
+        {"filter", [&]() { timer.setFilter(); }},
         {"x", [&]() { timer.stop(); }},
         {"start", [&]() { timer.start(); }}
     };

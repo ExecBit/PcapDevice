@@ -1,5 +1,6 @@
 #pragma once
 #include "PcapFileDevice.h"
+#include "PcapFilter.h"
 #include "PcapLiveDeviceList.h"
 #include "log4cplus/logger.h"
 
@@ -7,7 +8,8 @@ class PcapDevice {
 
 struct Counter {
     int count{0};
-    pcpp::RawPacketVector m_packetVec;
+    std::string filter;
+    pcpp::RawPacketVector packetVec;
 };
 
 public:
@@ -17,6 +19,7 @@ public:
 	void stopCapturing();
 	std::string listOfNetworkInterfaces();
 	void setNameOfNetworkInterface(const std::string& name);
+	void setFilter();
 	std::vector<std::string> convertor();
 	static void onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
 
