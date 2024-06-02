@@ -15,8 +15,6 @@ struct Counter {
 public:
 	PcapDevice();
 	void init();
-	void startCapturing();
-	void stopCapturing();
 	std::string listOfNetworkInterfaces();
 	void setNameOfNetworkInterface(const std::string& name);
 	void setFilter();
@@ -27,6 +25,8 @@ public:
 	void stop();
 
 private:
+	void startCapturing();
+	void stopCapturing();
 	pcpp::PcapLiveDevice* m_device{nullptr};
 	pcpp::RawPacketVector m_packetVec;
 	std::string m_nameOfNetworkInterface{"none"};

@@ -43,9 +43,9 @@ CommandInterface::CommandInterface() {
             }
         }},
         {"default", []() { std::cout << "Setting option...\n"; }},
-        {"print", []() { std::cout << "Setting option...\n"; }},
-        {"setFilter", []() { std::cout << "Setting option...\n"; }},
-        {"open", []() { std::cout << "Setting option...\n"; }}
+        {"print", [&]() { m_readPcapDev.print(); }},
+        {"setFilter", [&]() { m_readPcapDev.setFilter(); }},
+        {"open", [&]() { m_readPcapDev.open(); }}
     };
 
     // Start in the main menu

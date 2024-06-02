@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PcapDevice.h"
+#include "ReadPcapDevice.h"
 #include <stack>
 
 class CommandInterface {
@@ -25,5 +26,6 @@ private:
     void invalidCommand();
 
     PcapDevice timer;
+    ReadPcapDevice m_readPcapDev;
 };
 
