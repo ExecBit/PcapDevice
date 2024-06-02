@@ -43,7 +43,7 @@ CommandInterface::CommandInterface() {
             }
         }},
         {"default", []() { std::cout << "Setting option...\n"; }},
-        {"print", [&]() { m_readPcapDev.print(); }},
+        {"print", [&]() { std::cout << m_readPcapDev.print(); }},
         {"setFilter", [&]() { m_readPcapDev.setFilter(); }},
         {"open", [&]() { m_readPcapDev.open(); }}
     };
@@ -59,7 +59,7 @@ void CommandInterface::run() {
     std::string command;
 
     while (true) {
-        clearScreen();
+//        clearScreen();
         prompt();
         std::cin >> command;
 

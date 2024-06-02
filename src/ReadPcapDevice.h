@@ -16,8 +16,8 @@ public:
 
 private:
     pcpp::IFileReaderDevice*  m_reader{nullptr};
-    std::string m_currFileName;
     std::string m_filter;
+    std::string m_currFile;
     unsigned m_count{0};
 
 };
