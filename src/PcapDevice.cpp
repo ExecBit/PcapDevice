@@ -98,26 +98,6 @@ void PcapDevice::stopCapturing() {
     outputBuf += std::to_string(m_stats.count) + " packets captured\n";
 }
 
-std::vector<std::string> PcapDevice::convertor() {
-    std::vector<std::string> res; 
-    std::stringstream strm;
-    unsigned count{0};
-    for (const auto& packet : m_packetVec) {
-        pcpp::Packet parsedPacket(packet);
-        for (auto curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
-        {
-            strm << "No. " << count << '\t' 
-                << "Layer type: " << curLayer->getProtocol() << "; " // get layer type
-                << "Total data: " << curLayer->getDataLen() << " [bytes]; " // get total length of the layer
-                << "Layer data: " << curLayer->getHeaderLen() << " [bytes]; " // get the header length of the layer
-                << "Layer payload: " << curLayer->getLayerPayloadSize() << " [bytes]\n"; // get the payload length of the layer (equals total length minus header length)
-        }
-        ++count;
-        res.push_back(strm.str());
-    }
-    return res;
-}
-
 void PcapDevice::onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie) {
     // extract the stats object form the cookie
     Counter* stats = (Counter*)cookie;

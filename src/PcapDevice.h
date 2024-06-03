@@ -18,7 +18,6 @@ public:
 	std::string listOfNetworkInterfaces();
 	void setNameOfNetworkInterface(const std::string& name);
 	void setFilter();
-	std::vector<std::string> convertor();
 	static void onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
 
 	void start(std::string& buf);

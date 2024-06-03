@@ -5,13 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
-# FetchContent_Declare(
-#   ftxui
-#   GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-#   GIT_TAG v5.0.0
-# )
-# FetchContent_MakeAvailable(ftxui)
-
 FetchContent_Declare(
     PcapPlusPlus
     GIT_REPOSITORY https://github.com/seladb/PcapPlusPlus
@@ -25,13 +18,6 @@ FetchContent_Declare(
   GIT_TAG REL_2_1_1
 )
 FetchContent_MakeAvailable(log4cplus)
-
-FetchContent_Declare(
-  CLI11
-  GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-  GIT_TAG v2.4.2
-)
-FetchContent_MakeAvailable(CLI11)
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h )
 add_executable(pcap_viewer ${SOURCES})
@@ -47,9 +33,5 @@ target_link_libraries(pcap_viewer
                         Common++
                         Packet++
                         Pcap++
-                       #ftxui::dom
-                       #ftxui::screen
-                       #ftxui::component
                         log4cplus
-                        CLI11::CLI11
 )
