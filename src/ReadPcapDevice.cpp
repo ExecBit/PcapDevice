@@ -119,6 +119,7 @@ std::string ReadPcapDevice::print() {
 	strm << "\nNo. " + std::to_string(m_count++) + '\t' + parsedPacket.toString() + '\n';
     }
 
+    reader.close();
     return strm.str();
 }
 

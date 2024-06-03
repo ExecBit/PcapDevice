@@ -95,7 +95,13 @@ void PcapDevice::stopCapturing() {
 
     pcapWriter.writePackets(m_stats.packetVec);
 
-    outputBuf += std::to_string(m_stats.count) + " packets captured\n";
+    std::stringstream strm;
+    pcpp::IPcapDevice::PcapStats stats;
+//  // read stats from pcap writer and print them
+    pcapWriter.getStatistics(stats);
+    strm << "Written " << stats.packetsRecv << " packets successfully\n";
+
+    outputBuf += strm.str();
 }
 
 void PcapDevice::onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie) {
