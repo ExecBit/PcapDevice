@@ -39,10 +39,10 @@ bool ReadPcapDevice::containsWord(const std::string& str1, const std::string& st
     return false;
 }
 
-void ReadPcapDevice::open() {
+void ReadPcapDevice::open(std::string& buf) {
     const auto files = scanPcapFiles();
     if (files.empty()) {
-	std::cout << "Pcap files not found\n";	
+	buf += "Pcap files not found\n";	
 	return;
     }
 
@@ -87,18 +87,14 @@ std::string ReadPcapDevice::scanPcapFiles() {
     return strm.str();
 }
 
-void ReadPcapDevice::setFilter() {
+void ReadPcapDevice::setFilter(std::string& buf) {
     std::string input;
     std::cout << ": ";
     std::cin >> input;
 
     m_filter = input;
-  //if (m_reader->setFilter(input)) {
-  //    //LOG4CPLUS_INFO(m_logger, LOG4CPLUS_TEXT("Set filter " + input));
-  //    return;
-  //}
-  //std::cout << "ERROR set filter\n";
-//    LOG4CPLUS_WARN(m_logger, LOG4CPLUS_TEXT("Set filter: " + input + " failed!"));
+
+    buf += "Set filter: " + input + '\n';
 }
 
 std::string ReadPcapDevice::print() {
@@ -111,9 +107,8 @@ std::string ReadPcapDevice::print() {
     }
 
     if (!m_filter.empty() && !reader.setFilter(m_filter)) {
-//        std::cerr << "Error setting the filter: " << filter << std::endl;
         reader.close();
-        return "";
+        return "Error setting the filter: " + m_filter + '\n';
     }
 
     while (reader.getNextPacket(rawPacket)) {

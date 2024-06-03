@@ -21,10 +21,13 @@ private:
     std::unordered_map<std::string, std::function<void()>> readFileMenuCommands;
     std::stack<std::unordered_map<std::string, std::function<void()>>*> menuStack;
 
+    bool containsWord(const std::string& str1, const std::string& str2);
+    bool networkInterfaceMenu(std::string& name);
     void clearScreen();
     void prompt();
     void invalidCommand();
 
+    std::string buf;
     PcapDevice timer;
     ReadPcapDevice m_readPcapDev;
 };

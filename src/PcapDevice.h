@@ -21,8 +21,10 @@ public:
 	std::vector<std::string> convertor();
 	static void onPacketArrivesAsync(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie);
 
-	void start();
-	void stop();
+	void start(std::string& buf);
+	void stop(std::string& buf);
+
+	std::string outputBuf;
 
 private:
 	void startCapturing();

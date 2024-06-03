@@ -40,18 +40,18 @@ void PcapDevice::init() {
     }
 }
 
-void PcapDevice::start() {
+void PcapDevice::start(std::string& buf) {
     if (!m_running) {
         m_stopRequested = false;
         m_devThread = std::thread(&PcapDevice::startCapturing, this);
         m_running = true;
-        std::cout << "Capture started" << std::endl;
+        buf += "Capture started\n";
     } else {
-        std::cout << "Capture is already running" << std::endl;
+        buf += "Capture is already running\n";
     }
 }
 
-void PcapDevice::stop() {
+void PcapDevice::stop(std::string& buf) {
     if (m_running) {
         {
             std::lock_guard<std::mutex> lock(m_mtx);
@@ -60,8 +60,9 @@ void PcapDevice::stop() {
         m_conVar.notify_all();
         m_devThread.join();
         m_running = false;
+        buf = outputBuf;
     } else {
-        std::cout << "Capture is not running" << std::endl;
+        buf += "Capture is not running\n";
     }
 }
 
@@ -94,7 +95,7 @@ void PcapDevice::stopCapturing() {
 
     pcapWriter.writePackets(m_stats.packetVec);
 
-    std::cout << m_stats.count << " packets captured" << std::endl;
+    outputBuf += std::to_string(m_stats.count) + " packets captured\n";
 }
 
 std::vector<std::string> PcapDevice::convertor() {

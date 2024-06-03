@@ -9,8 +9,8 @@ class ReadPcapDevice {
 public:
     bool init(const std::string& name);
     std::string scanPcapFiles();
-    void open();
-    void setFilter();
+    void open(std::string& buf);
+    void setFilter(std::string& buf);
     std::string print();
     bool containsWord(const std::string& str1, const std::string& str2);
 

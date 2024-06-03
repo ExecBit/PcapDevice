@@ -34,5 +34,31 @@ int main() {
     CommandInterface cmd;
     cmd.run();
 
+    PcapDevice pdev;
+    auto listDev = pdev.listOfNetworkInterfaces();
+
+    std::cout << "List of Network Interfaces\n" <<
+    "=========================\n" + listDev + "=========================\n";
+
+    std::string input_int;
+    while (true) {
+        std::cout << "Please, enter interface: ";
+
+        std::getline(std::cin, input_int);
+
+        if (containsWord(input_int, listDev)) {
+            break;
+        }
+        std::cout << "Wrong interface, try again\n";
+    }
+
+    std::string name;
+    if (auto it = listDev.find(input_int); it != std::string::npos) {
+        name = listDev.substr(it, 6);
+        LOG4CPLUS_INFO(mainLogger, LOG4CPLUS_TEXT("Entered network interface:\t" + listDev.substr(it, 6)));
+    }
+
+    pdev.setNameOfNetworkInterface(name);
+
     return 0;
 }
